@@ -49,9 +49,7 @@ def f(
     element = 0  # type: int
     another_element = 1  # type: float
     another_element_with_long_name = 2  # type: int
-    another_really_really_long_element_with_a_unnecessarily_long_name_to_describe_what_it_does_enterprise_style = (
-        3
-    )  # type: int
+    another_really_really_long_element_with_a_unnecessarily_long_name_to_describe_what_it_does_enterprise_style = 3  # type: int
     an_element_with_a_long_value = calls() or more_calls() and more()  # type: bool
 
     tup = (

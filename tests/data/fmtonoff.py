@@ -334,14 +334,9 @@ def on_and_off_broken():
 
 def long_lines():
     if True:
-        typedargslist.extend(
-            gen_annotated_params(
-                ast_args.kwonlyargs,
-                ast_args.kw_defaults,
-                parameters,
-                implicit_default=True,
-            )
-        )
+        typedargslist.extend(gen_annotated_params(
+            ast_args.kwonlyargs, ast_args.kw_defaults, parameters, implicit_default=True
+        ))
         # fmt: off
         a = (
             unnecessary_bracket()

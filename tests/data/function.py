@@ -168,7 +168,8 @@ def spaces2(result=_core.Value(None)):
 
 def example(session):
     result = (
-        session.query(models.Customer.id)
+        session
+        .query(models.Customer.id)
         .filter(
             models.Customer.account_id == account_id,
             models.Customer.email == email_address,
@@ -180,23 +181,16 @@ def example(session):
 
 def long_lines():
     if True:
-        typedargslist.extend(
-            gen_annotated_params(
-                ast_args.kwonlyargs,
-                ast_args.kw_defaults,
-                parameters,
-                implicit_default=True,
-            )
-        )
-        typedargslist.extend(
-            gen_annotated_params(
-                ast_args.kwonlyargs,
-                ast_args.kw_defaults,
-                parameters,
-                implicit_default=True,
-                # trailing standalone comment
-            )
-        )
+        typedargslist.extend(gen_annotated_params(
+            ast_args.kwonlyargs, ast_args.kw_defaults, parameters, implicit_default=True
+        ))
+        typedargslist.extend(gen_annotated_params(
+            ast_args.kwonlyargs,
+            ast_args.kw_defaults,
+            parameters,
+            implicit_default=True,
+            # trailing standalone comment
+        ))
     _type_comment_re = re.compile(
         r"""
         ^
@@ -231,13 +225,11 @@ def trailing_comma():
 
 
 def f(a, **kwargs,) -> A:
-    return (
-        yield from A(
-            very_long_argument_name1=very_long_value_for_the_argument,
-            very_long_argument_name2=very_long_value_for_the_argument,
-            **kwargs,
-        )
-    )
+    return (yield from A(
+        very_long_argument_name1=very_long_value_for_the_argument,
+        very_long_argument_name2=very_long_value_for_the_argument,
+        **kwargs,
+    ))
 
 
 def __await__():

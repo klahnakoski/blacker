@@ -184,12 +184,8 @@ def initialize(cache_dir: Union[str, "os.PathLike[str]", None] = None) -> None:
     del python_grammar_no_print_statement_no_exec_statement.keywords["exec"]
 
     # Python 3.7+
-    python_grammar_no_print_statement_no_exec_statement_async_keywords = (
-        python_grammar_no_print_statement_no_exec_statement.copy()
-    )
-    python_grammar_no_print_statement_no_exec_statement_async_keywords.async_keywords = (
-        True
-    )
+    python_grammar_no_print_statement_no_exec_statement_async_keywords = python_grammar_no_print_statement_no_exec_statement.copy()
+    python_grammar_no_print_statement_no_exec_statement_async_keywords.async_keywords = True
 
     pattern_grammar = driver.load_packaged_grammar(
         "blib2to3", _PATTERN_GRAMMAR_FILE, cache_dir

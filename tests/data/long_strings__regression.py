@@ -73,6 +73,19 @@ class A:
             (x, y, z),
         )
 
+
+class A:
+    def disappearing_comment():
+        return (
+            ("{{xxx_xxxxxxxxxx_xxxxxxxx}} xxx xxxx {} {{xxxx}} >&2".format(  # xx -x xxxxxxx xx xxx xxxxxxx.
+                "{xxxx} {xxxxxx}"
+                if xxxxx.xx_xxxxxxxxxx
+                else ("--xxxxxxx --xxxxxx=x --xxxxxx-xxxxx=xxxxxx --xxxxxx-xxxx=xxxxxxxxxxx.xxx")  # Disappearing Comment
+            )),
+            (x, y, z),
+        )
+
+
 class A:
     class B:
         def foo():
@@ -359,14 +372,13 @@ class A:
 
 class A:
     def foo():
-        XXXXXXXXXXXX.append(
-            (
-                "xxx_xxxxxxxxxx(xxxxx={}, xxxx={}, xxxxx, xxxx_xxxx_xxxxxxxxxx={})"
-                .format(xxxxx, xxxx, xxxx_xxxx_xxxxxxxxxx),
-                my_var,
-                my_other_var,
-            )
-        )
+        XXXXXXXXXXXX.append((
+            "xxx_xxxxxxxxxx(xxxxx={}, xxxx={}, xxxxx, xxxx_xxxx_xxxxxxxxxx={})".format(
+                xxxxx, xxxx, xxxx_xxxx_xxxxxxxxxx
+            ),
+            my_var,
+            my_other_var,
+        ))
 
 
 class A:
@@ -404,6 +416,21 @@ class A:
                         " --xxxxxx-xxxx=xxxxxxxxxxx.xxx"
                     )
                 )
+            ),
+            (x, y, z),
+        )
+
+
+class A:
+    def disappearing_comment():
+        return (
+            "{{xxx_xxxxxxxxxx_xxxxxxxx}} xxx xxxx {} {{xxxx}} >&2".format(  # xx -x xxxxxxx xx xxx xxxxxxx.
+                "{xxxx} {xxxxxx}"
+                if xxxxx.xx_xxxxxxxxxx
+                else (
+                    "--xxxxxxx --xxxxxx=x --xxxxxx-xxxxx=xxxxxx"
+                    " --xxxxxx-xxxx=xxxxxxxxxxx.xxx"
+                )  # Disappearing Comment
             ),
             (x, y, z),
         )

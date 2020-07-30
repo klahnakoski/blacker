@@ -78,9 +78,7 @@ def _combinations(*l):
 Whitespace = r"[ \f\t]*"
 Comment = r"#[^\r\n]*"
 Ignore = Whitespace + any(r"\\\r?\n" + Whitespace) + maybe(Comment)
-Name = (  # this is invalid but it's fine because Name comes after Number in all groups
-    r"\w+"
-)
+Name = r"\w+"
 
 Binnumber = r"0[bB]_?[01]+(?:_[01]+)*"
 Hexnumber = r"0[xX]_?[\da-fA-F]+(?:_[\da-fA-F]+)*[lL]?"
@@ -88,9 +86,9 @@ Octnumber = r"0[oO]?_?[0-7]+(?:_[0-7]+)*[lL]?"
 Decnumber = group(r"[1-9]\d*(?:_\d+)*[lL]?", "0[lL]?")
 Intnumber = group(Binnumber, Hexnumber, Octnumber, Decnumber)
 Exponent = r"[eE][-+]?\d+(?:_\d+)*"
-Pointfloat = group(r"\d+(?:_\d+)*\.(?:\d+(?:_\d+)*)?", r"\.\d+(?:_\d+)*") + maybe(
-    Exponent
-)
+Pointfloat = group(
+    r"\d+(?:_\d+)*\.(?:\d+(?:_\d+)*)?", r"\.\d+(?:_\d+)*"
+) + maybe(Exponent)
 Expfloat = r"\d+(?:_\d+)*" + Exponent
 Floatnumber = group(Pointfloat, Expfloat)
 Imagnumber = group(r"\d+(?:_\d+)*[jJ]", Floatnumber + r"[jJ]")
@@ -295,9 +293,11 @@ def _get_normal_name(orig_enc: str) -> str:
     enc = orig_enc[:12].lower().replace("_", "-")
     if enc == "utf-8" or enc.startswith("utf-8-"):
         return "utf-8"
-    if enc in ("latin-1", "iso-8859-1", "iso-latin-1") or enc.startswith(
-        ("latin-1-", "iso-8859-1-", "iso-latin-1-")
-    ):
+    if enc in ("latin-1", "iso-8859-1", "iso-latin-1") or enc.startswith((
+        "latin-1-",
+        "iso-8859-1-",
+        "iso-latin-1-",
+    )):
         return "iso-8859-1"
     return orig_enc
 

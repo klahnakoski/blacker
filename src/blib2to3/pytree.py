@@ -755,9 +755,7 @@ class WildcardPattern(BasePattern):
             f = lambda s: tuple(s)
             wrapped_content = tuple(map(f, content))  # Protect against alterations
             # Check sanity of alternatives
-            assert len(wrapped_content), repr(
-                wrapped_content
-            )  # Can't have zero alternatives
+            assert len(wrapped_content), repr(wrapped_content)  # Can't have zero alternatives
             for alt in wrapped_content:
                 assert len(alt), repr(alt)  # Can have empty alternatives
         self.content = wrapped_content

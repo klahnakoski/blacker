@@ -58,9 +58,7 @@ some_variable = (
 )
 some_variable = (
     "This string is long but not so long that it needs hahahah toooooo be so greatttt"
-    " {} that I just can't think of any more good words to say about it at alll".format(
-        "ha"
-    )
+    " {} that I just can't think of any more good words to say about it at alll".format("ha")
 )
 some_variable = (
     "This string is long but not so long that it needs hahahah toooooo be so greatttt"

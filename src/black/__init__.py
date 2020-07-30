@@ -42,6 +42,9 @@ from typing import (
     cast,
     TYPE_CHECKING,
 )
+
+from mo_future import zip_longest
+from mo_logs import Log
 from typing_extensions import Final
 from mypy_extensions import mypyc_attr
 
@@ -590,24 +593,20 @@ def get_sources(
     for s in src:
         p = Path(s)
         if p.is_dir():
-            sources.update(
-                gen_python_files(
-                    p.iterdir(),
-                    root,
-                    include_regex,
-                    exclude_regexes,
-                    report,
-                    get_gitignore(root),
-                )
-            )
+            sources.update(gen_python_files(
+                p.iterdir(),
+                root,
+                include_regex,
+                exclude_regexes,
+                report,
+                get_gitignore(root),
+            ))
         elif s == "-":
             sources.add(p)
         elif p.is_file():
-            sources.update(
-                gen_python_files(
-                    [p], root, None, exclude_regexes, report, get_gitignore(root)
-                )
-            )
+            sources.update(gen_python_files(
+                [p], root, None, exclude_regexes, report, get_gitignore(root)
+            ))
         else:
             err(f"invalid path: {s}")
     return sources
@@ -678,17 +677,15 @@ def reformat_many(
         executor = ThreadPoolExecutor(max_workers=1)
 
     try:
-        loop.run_until_complete(
-            schedule_formatting(
-                sources=sources,
-                fast=fast,
-                write_back=write_back,
-                mode=mode,
-                report=report,
-                loop=loop,
-                executor=executor,
-            )
-        )
+        loop.run_until_complete(schedule_formatting(
+            sources=sources,
+            fast=fast,
+            write_back=write_back,
+            mode=mode,
+            report=report,
+            loop=loop,
+            executor=executor,
+        ))
     finally:
         shutdown(loop)
         if executor is not None:
@@ -729,11 +726,9 @@ async def schedule_formatting(
         manager = Manager()
         lock = manager.Lock()
     tasks = {
-        asyncio.ensure_future(
-            loop.run_in_executor(
-                executor, format_file_in_place, src, fast, mode, write_back, lock
-            )
-        ): src
+        asyncio.ensure_future(loop.run_in_executor(
+            executor, format_file_in_place, src, fast, mode, write_back, lock
+        )): src
         for src in sorted(sources)
     }
     pending: Iterable["asyncio.Future[bool]"] = tasks.keys()
@@ -911,6 +906,17 @@ def format_file_contents(src_contents: str, *, fast: bool, mode: Mode) -> FileCo
     if src_contents == dst_contents:
         raise NothingChanged
 
+    for i, (e, a) in enumerate(zip_longest(src_contents, dst_contents)):
+        if e != a:
+            Log.note(
+                "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
+                i=i,
+                expected=dst_contents[i - 20 : i + 20],
+                actual=src_contents[i - 20 : i + 20],
+            )
+
+            break
+
     if not fast:
         assert_equivalent(src_contents, dst_contents)
         assert_stable(src_contents, dst_contents, mode=mode)
@@ -1027,9 +1033,7 @@ def get_grammars(target_versions: Set[TargetVersion]) -> List[Grammar]:
     # If we have to parse both, try to parse async as a keyword first
     if not supports_feature(target_versions, Feature.ASYNC_IDENTIFIERS):
         # Python 3.7+
-        grammars.append(
-            pygram.python_grammar_no_print_statement_no_exec_statement_async_keywords
-        )
+        grammars.append(pygram.python_grammar_no_print_statement_no_exec_statement_async_keywords)
     if not supports_feature(target_versions, Feature.ASYNC_KEYWORDS):
         # Python 3.0-3.6
         grammars.append(pygram.python_grammar_no_print_statement_no_exec_statement)
@@ -1261,6 +1265,7 @@ class BracketTracker:
     bracket_match: Dict[Tuple[Depth, NodeType], Leaf] = field(default_factory=dict)
     delimiters: Dict[LeafID, Priority] = field(default_factory=dict)
     previous: Optional[Leaf] = None
+    previous_priority: Optional[int] = None
     _for_loop_depths: List[int] = field(default_factory=list)
     _lambda_argument_depths: List[int] = field(default_factory=list)
 
@@ -1292,11 +1297,15 @@ class BracketTracker:
         if self.depth == 0:
             delim = is_split_before_delimiter(leaf, self.previous)
             if delim and self.previous is not None:
-                self.delimiters[id(self.previous)] = delim
+                if delim >= self.previous_priority:
+                    self.delimiters[id(self.previous)] = delim
+                else:
+                    self.delimiters[id(leaf)] = delim
             else:
                 delim = is_split_after_delimiter(leaf, self.previous)
                 if delim:
                     self.delimiters[id(leaf)] = delim
+            self.previous_priority = delim
         if leaf.type in OPENING_BRACKETS:
             self.bracket_match[self.depth, BRACKET[leaf.type]] = leaf
             self.depth += 1
@@ -1742,9 +1751,9 @@ class Line:
         """Remove the trailing comma and moves the comments attached to it."""
         trailing_comma = self.leaves.pop()
         trailing_comma_comments = self.comments.pop(id(trailing_comma), [])
-        self.comments.setdefault(id(self.leaves[-1]), []).extend(
-            trailing_comma_comments
-        )
+        self.comments.setdefault(
+            id(self.leaves[-1]), []
+        ).extend(trailing_comma_comments)
 
     def is_complex_subscript(self, leaf: Leaf) -> bool:
         """Return True iff `leaf` is part of a slice with non-trivial exprs."""
@@ -2457,7 +2466,6 @@ def is_split_before_delimiter(leaf: Leaf, previous: Optional[Leaf] = None) -> Pr
         leaf.type == token.DOT
         and leaf.parent
         and leaf.parent.type not in {syms.import_from, syms.dotted_name}
-        and (previous is None or previous.type in CLOSING_BRACKETS)
     ):
         return DOT_PRIORITY
 
@@ -2609,11 +2617,9 @@ def list_comments(prefix: str, *, is_endmarker: bool) -> List[ProtoComment]:
         else:
             comment_type = STANDALONE_COMMENT
         comment = make_comment(line)
-        result.append(
-            ProtoComment(
-                type=comment_type, value=comment, newlines=nlines, consumed=consumed
-            )
-        )
+        result.append(ProtoComment(
+            type=comment_type, value=comment, newlines=nlines, consumed=consumed
+        ))
         nlines = 0
     return result
 
@@ -2726,14 +2732,12 @@ def transform_line(
                         "Line transformer returned an unchanged result"
                     )
 
-                result.extend(
-                    transform_line(
-                        transformed_line,
-                        line_length=line_length,
-                        normalize_strings=normalize_strings,
-                        features=features,
-                    )
-                )
+                result.extend(transform_line(
+                    transformed_line,
+                    line_length=line_length,
+                    normalize_strings=normalize_strings,
+                    features=features,
+                ))
         except CannotTransform:
             continue
         else:
@@ -3142,9 +3146,9 @@ class StringMerger(CustomSplitMapMixin, StringTransformer):
         temp_string = S_leaf.value[len(prefix) + 1 : -1]
         for has_prefix in prefix_tracker:
             mark_idx = temp_string.find(BREAK_MARK)
-            assert (
-                mark_idx >= 0
-            ), "Logic error while filling the custom string breakpoint cache."
+            assert mark_idx >= 0, (
+                "Logic error while filling the custom string breakpoint cache."
+            )
 
             temp_string = temp_string[mark_idx + len(BREAK_MARK) :]
             breakpoint_idx = mark_idx + (len(prefix) if has_prefix else 0) + 1
@@ -3401,8 +3405,9 @@ class BaseStringSplitter(StringTransformer):
                 " no parent)."
             )
 
-        if id(line.leaves[string_idx]) in line.comments and contains_pragma_comment(
-            line.comments[id(line.leaves[string_idx])]
+        if (
+            id(line.leaves[string_idx]) in line.comments
+            and contains_pragma_comment(line.comments[id(line.leaves[string_idx])])
         ):
             return TErr(
                 "Line appears to end with an inline pragma comment. Splitting the line"
@@ -4030,9 +4035,10 @@ class StringParenWrapper(CustomSplitMapMixin, BaseStringSplitter):
         """
         # If this line is apart of a return/yield statement and the first leaf
         # contains either the "return" or "yield" keywords...
-        if parent_type(LL[0]) in [syms.return_stmt, syms.yield_expr] and LL[
-            0
-        ].value in ["return", "yield"]:
+        if parent_type(LL[0]) in [
+            syms.return_stmt,
+            syms.yield_expr,
+        ] and LL[0].value in ["return", "yield"]:
             is_valid_index = is_valid_index_factory(LL)
 
             idx = 2 if is_valid_index(1) and is_empty_par(LL[1]) else 1
@@ -4670,9 +4676,9 @@ def assert_is_leaf_string(string: str) -> None:
         "'",
         '"',
     ), f"{string!r} is missing an ending quote character (' or \")."
-    assert set(string[:quote_idx]).issubset(
-        set(STRING_PREFIX_CHARS)
-    ), f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
+    assert set(string[:quote_idx]).issubset(set(STRING_PREFIX_CHARS)), (
+        f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
+    )
 
 
 def left_hand_split(line: Line, _features: Collection[Feature] = ()) -> Iterator[Line]:
@@ -4793,6 +4799,53 @@ def right_hand_split(
                     " line."
                 )
 
+    # IF THE body CAN BE EXPLODED, DO THAT FIRST
+    single_item = True
+    curr_depth = body.bracket_tracker.depth
+    num_dots = 0
+    num_comments = 0
+    for leaf in body.leaves:
+        if leaf.bracket_depth == curr_depth:
+            if leaf.type == token.STRING:
+                num_comments += 1
+                if len(leaf.value) > line_length:
+                    num_dots = 0
+                    num_comments = 0
+                    single_item = False
+            if single_item and leaf.type == token.DOT:
+                num_dots += 1
+            if (
+                leaf.type == token.COMMA
+                or leaf.type in MATH_OPERATORS
+                or leaf.value in ("and", "or", "#", "if", "in", "is")
+            ):
+                num_dots = 0
+                num_comments = 0
+                single_item = False
+
+    head_len = len(str(head).strip())
+    body_len = len(str(body))
+
+    if (
+        # NOT A TUPLE
+        single_item
+        # SINGLE ITEM WITHOUT CHAINING
+        and num_dots < 3
+        # MULTIPLE COMMENTS INDICATES SOME SPECIFL STRING FORMATTING
+        and num_comments <= 1
+        # THE BODY IS COMPLICATED, OR SIMPLE ASSIGN OR SIMPLE AND SHORT
+        and (
+            len(body.leaves) >= 3
+            or head_len > body_len
+            or head_len + body_len < line_length
+        )
+        # there are no standalone comments in the body
+        and not body.contains_standalone_comments(0)
+    ):
+        omit = {id(closing_bracket), *omit}
+        yield from right_hand_split(line, line_length, features=features, omit=omit)
+        return
+
     ensure_visible(opening_bracket)
     ensure_visible(closing_bracket)
     for result in (head, body, tail):
@@ -4859,7 +4912,7 @@ def bracket_split_build_line(
                     break
 
     # Populate the line
-    for leaf in leaves:
+    for i, leaf in enumerate(leaves):
         result.append(leaf, preformatted=True)
         for comment_after in original.comments_after(leaf):
             result.append(comment_after, preformatted=True)
@@ -5932,17 +5985,17 @@ class Report:
         report = []
         if self.change_count:
             s = "s" if self.change_count > 1 else ""
-            report.append(
-                click.style(f"{self.change_count} file{s} {reformatted}", bold=True)
-            )
+            report.append(click.style(
+                f"{self.change_count} file{s} {reformatted}", bold=True
+            ))
         if self.same_count:
             s = "s" if self.same_count > 1 else ""
             report.append(f"{self.same_count} file{s} {unchanged}")
         if self.failure_count:
             s = "s" if self.failure_count > 1 else ""
-            report.append(
-                click.style(f"{self.failure_count} file{s} {failed}", fg="red")
-            )
+            report.append(click.style(
+                f"{self.failure_count} file{s} {failed}", fg="red"
+            ))
         return ", ".join(report) + "."
 
 
@@ -6114,9 +6167,9 @@ def diff(a: str, b: str, a_name: str, b_name: str) -> str:
 
     a_lines = [line + "\n" for line in a.splitlines()]
     b_lines = [line + "\n" for line in b.splitlines()]
-    return "".join(
-        difflib.unified_diff(a_lines, b_lines, fromfile=a_name, tofile=b_name, n=5)
-    )
+    return "".join(difflib.unified_diff(
+        a_lines, b_lines, fromfile=a_name, tofile=b_name, n=5
+    ))
 
 
 def cancel(tasks: Iterable["asyncio.Task[Any]"]) -> None:
@@ -6140,9 +6193,9 @@ def shutdown(loop: asyncio.AbstractEventLoop) -> None:
 
         for task in to_cancel:
             task.cancel()
-        loop.run_until_complete(
-            asyncio.gather(*to_cancel, loop=loop, return_exceptions=True)
-        )
+        loop.run_until_complete(asyncio.gather(
+            *to_cancel, loop=loop, return_exceptions=True
+        ))
     finally:
         # `concurrent.futures.Future` objects cannot be cancelled once they
         # are already running. There might be some when the `shutdown()` happened.

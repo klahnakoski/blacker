@@ -20,7 +20,9 @@ def func():
             if exc not in _seen:
                 embedded.append(
                     # This should be left alone (before)
-                    traceback.TracebackException.from_exception(
+                    traceback
+                    .TracebackException
+                    .from_exception(
                         exc,
                         limit=limit,
                         lookup_lines=lookup_lines,

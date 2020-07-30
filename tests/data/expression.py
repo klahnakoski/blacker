@@ -385,15 +385,15 @@ tuple[
 very_long_variable_name_filters: t.List[
     t.Tuple[str, t.Union[str, t.List[t.Optional[str]]]],
 ]
-xxxx_xxxxx_xxxx_xxx: Callable[..., List[SomeClass]] = classmethod(  # type: ignore
-    sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__)
-)
-xxxx_xxx_xxxx_xxxxx_xxxx_xxx: Callable[..., List[SomeClass]] = classmethod(  # type: ignore
-    sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__)
-)
-xxxx_xxx_xxxx_xxxxx_xxxx_xxx: Callable[..., List[SomeClass]] = classmethod(
-    sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__)
-)  # type: ignore
+xxxx_xxxxx_xxxx_xxx: Callable[
+    ..., List[SomeClass]
+] = classmethod(sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__))  # type: ignore
+xxxx_xxx_xxxx_xxxxx_xxxx_xxx: Callable[
+    ..., List[SomeClass]
+] = classmethod(sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__))  # type: ignore
+xxxx_xxx_xxxx_xxxxx_xxxx_xxx: Callable[
+    ..., List[SomeClass]
+] = classmethod(sync(async_xxxx_xxx_xxxx_xxxxx_xxxx_xxx.__func__))  # type: ignore
 slice[0]
 slice[0:1]
 slice[0:1:2]
@@ -448,14 +448,15 @@ d = (1,) + a + (2,)
 e = (1,).count(1)
 f = 1, *range(10)
 g = 1, *"ten"
-what_is_up_with_those_new_coord_names = (coord_names + set(vars_to_create)) + set(
-    vars_to_remove
-)
-what_is_up_with_those_new_coord_names = (coord_names | set(vars_to_create)) - set(
-    vars_to_remove
-)
+what_is_up_with_those_new_coord_names = (
+    coord_names + set(vars_to_create)
+) + set(vars_to_remove)
+what_is_up_with_those_new_coord_names = (
+    coord_names | set(vars_to_create)
+) - set(vars_to_remove)
 result = (
-    session.query(models.Customer.id)
+    session
+    .query(models.Customer.id)
     .filter(
         models.Customer.account_id == account_id, models.Customer.email == email_address
     )
@@ -487,8 +488,8 @@ print(*[] or [1])
 print(**{1: 3} if False else {x: x for x in range(3)})
 print(*lambda x: x)
 assert not Test, "Short message"
-assert this is ComplexTest and not requirements.fit_in_a_single_line(
-    force=False
+assert (
+    this is ComplexTest and not requirements.fit_in_a_single_line(force=False)
 ), "Short message"
 assert parens is TooMany
 for (x,) in (1,), (2,), (3,):
