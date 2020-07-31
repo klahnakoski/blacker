@@ -47,7 +47,6 @@ import click
 import regex as re
 import toml
 from appdirs import user_cache_dir
-from mypy_extensions import mypyc_attr
 from pathspec import PathSpec
 from typed_ast import ast3, ast27
 from typing_extensions import Final
@@ -4661,9 +4660,9 @@ def assert_is_leaf_string(string: str) -> None:
         "'",
         '"',
     ), f"{string!r} is missing an ending quote character (' or \")."
-    assert set(string[:quote_idx]).issubset(set(STRING_PREFIX_CHARS)), (
-        f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
-    )
+    assert (
+        set(string[:quote_idx]).issubset(set(STRING_PREFIX_CHARS))
+    ), f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
 
 
 def left_hand_split(line: Line, _features: Collection[Feature] = ()) -> Iterator[Line]:
@@ -4787,23 +4786,28 @@ def right_hand_split(
     # IF THE body CAN BE EXPLODED, DO THAT FIRST
     single_item = True
     curr_depth = body.bracket_tracker.depth
+    chain_length = 0
     num_dots = 0
     num_comments = 0
-    for leaf in body.leaves:
+    for leaf, prev_leaf in zip(body.leaves, [None] + body.leaves):
         if leaf.bracket_depth == curr_depth:
             if leaf.type == token.STRING:
                 num_comments += 1
                 if len(leaf.value) > line_length:
+                    chain_length = 0
                     num_dots = 0
                     num_comments = 0
                     single_item = False
             if single_item and leaf.type == token.DOT:
+                if prev_leaf is not None and prev_leaf.type == token.RPAR:
+                    chain_length += 1
                 num_dots += 1
             if (
                 leaf.type == token.COMMA
                 or leaf.type in MATH_OPERATORS
                 or leaf.value in ("and", "or", "#", "if", "in", "is")
             ):
+                chain_length = 0
                 num_dots = 0
                 num_comments = 0
                 single_item = False
@@ -4814,8 +4818,8 @@ def right_hand_split(
     if (
         # NOT A TUPLE
         single_item
-        # SINGLE ITEM WITHOUT CHAINING
-        and num_dots < 3
+        # SINGLE ITEM AND NO CHAINING
+        and chain_length == 0
         # MULTIPLE COMMENTS INDICATES SOME SPECIFL STRING FORMATTING
         and num_comments <= 1
         # THE BODY IS COMPLICATED, OR SIMPLE ASSIGN OR SIMPLE AND SHORT
@@ -6124,7 +6128,6 @@ def assert_stable(src: str, dst: str, mode: Mode) -> None:
         ) from None
 
 
-@mypyc_attr(patchable=True)
 def dump_to_file(*output: str) -> str:
     """Dump `output` to a temporary file. Return path to the file."""
     with tempfile.NamedTemporaryFile(

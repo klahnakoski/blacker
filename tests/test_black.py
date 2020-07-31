@@ -155,20 +155,28 @@ class BlackTestCase(unittest.TestCase):
                 list(bdv.visit(exp_node))
             except Exception as ve:
                 black.err(str(ve))
-        for i, (e, a) in enumerate(zip_longest(expected, actual)):
-            if e != a:
+
+        try:
+            self.assertEqual(expected, actual)
+        except Exception as cause:
+            try:
                 from mo_logs import Log
 
-                Log.note(
-                    "problem at char {{i}}\nexpect: {{expected|quote}}\nactual:"
-                    " {{actual|quote}}",
-                    i=i,
-                    expected=expected[i - 20 : i + 20],
-                    actual=actual[i - 20 : i + 20],
-                )
-                break
+                for i, (e, a) in enumerate(zip_longest(expected, actual)):
+                    if e != a:
 
-        self.assertEqual(expected, actual)
+                        Log.note(
+                            "problem at char {{i}}\nexpect: {{expected|quote}}\nactual:"
+                            " {{actual|quote}}",
+                            i=i,
+                            expected=expected[i - 20 : i + 20],
+                            actual=actual[i - 20 : i + 20],
+                        )
+                        break
+            except Exception:
+                pass
+            finally:
+                raise cause
 
     def invokeBlack(
         self, args: List[str], exit_code: int = 0, ignore_config: bool = True
@@ -252,9 +260,6 @@ class BlackTestCase(unittest.TestCase):
 
     def test_token(self) -> None:
         self.checkSourceFile("src/blib2to3/pgen2/token.py")
-
-    def test_setup(self) -> None:
-        self.checkSourceFile("setup.py")
 
     def test_piping(self) -> None:
         source, expected = read_data("src/black/__init__", data=False)

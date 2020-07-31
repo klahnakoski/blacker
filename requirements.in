@@ -1,0 +1,10 @@
+click
+attrs
+appdirs
+toml
+typed-ast
+regex
+pathspec
+dataclasses
+aiohttp_cors
+aiohttp
