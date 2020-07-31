@@ -42,6 +42,7 @@ Be sure you are in the `mo-black` main directory
     python -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
+    pip install -r tests/requirements.txt
     export PYTHONPATH=src:.
     export SKIP_AST_PRINT=true
     python -m unittest tests/test_black.py
@@ -52,6 +53,7 @@ Be sure you are in the `mo-black` main directory
     python -m virtualenv .venv             
     .venv\Scripts\activate
     pip install -r requirements.txt
+    pip install -r tests\requirements.txt
     set PYTHONPATH=src;.
     set SKIP_AST_PRINT=true
     python -m unittest tests\test_black.py

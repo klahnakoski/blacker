@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
 from contextlib import contextmanager
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache, partial, wraps
@@ -46,9 +47,6 @@ import click
 import regex as re
 import toml
 from appdirs import user_cache_dir
-from dataclasses import dataclass, field, replace
-from mo_files import File
-from mo_json import json2value
 from mypy_extensions import mypyc_attr
 from pathspec import PathSpec
 from typed_ast import ast3, ast27
@@ -903,19 +901,6 @@ def format_file_contents(src_contents: str, *, fast: bool, mode: Mode) -> FileCo
     dst_contents = format_str(src_contents, mode=mode)
     if src_contents == dst_contents:
         raise NothingChanged
-
-    for i, (e, a) in enumerate(itertools.zip_longest(src_contents, dst_contents)):
-        if e != a:
-            from mo_logs import Log
-
-            Log.note(
-                "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
-                i=i,
-                expected=dst_contents[i - 20 : i + 20],
-                actual=src_contents[i - 20 : i + 20],
-            )
-
-            break
 
     if not fast:
         assert_equivalent(src_contents, dst_contents)

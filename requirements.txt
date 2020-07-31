@@ -8,7 +8,3 @@ pathspec
 dataclasses>=0.6
 aiohttp_cors
 aiohttp
-mo-files
-mo-logs
-mo-math
-mo-json
