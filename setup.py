@@ -16,5 +16,6 @@ setup(
     name='blacker',
     packages=["blackd","black","blib2to3","blib2to3.pgen2","black_primer"],
     url='https://github.com/klahnakoski/blacker',
-    version='3.87.20213'
+    version='3.87.20213',
+    package_dir={"": "src"},
 )
