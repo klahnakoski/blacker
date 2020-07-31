@@ -10,14 +10,6 @@ CURRENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(CURRENT_DIR))  # for setuptools.build_meta
 
 
-def get_long_description() -> str:
-    return (
-        (CURRENT_DIR / "README.md").read_text(encoding="utf8")
-        + "\n\n"
-        + (CURRENT_DIR / "CHANGES.md").read_text(encoding="utf8")
-    )
-
-
 USE_MYPYC = False
 # To compile with mypyc, a mypyc checkout must be present on the PYTHONPATH
 if len(sys.argv) > 1 and sys.argv[1] == "--use-mypyc":
@@ -51,14 +43,11 @@ setup(
         "write_to": "src/_black_version.py",
         "write_to_template": 'version = "{version}"\n',
     },
-    description="The uncompromising code formatter.",
-    long_description=get_long_description(),
-    long_description_content_type="text/markdown",
+    description="Blacker! Denser Black formatting",
     keywords="automation formatter yapf autopep8 pyfmt gofmt rustfmt",
-    author="Łukasz Langa",
-    author_email="lukasz@langa.pl",
+    author="Kyle Lahnakoski",
+    author_email="kyle@lahnakoski.com",
     url="https://github.com/psf/black",
-    project_urls={"Changelog": "https://github.com/psf/black/blob/master/CHANGES.md"},
     license="MIT",
     py_modules=["_black_version"],
     ext_modules=ext_modules,

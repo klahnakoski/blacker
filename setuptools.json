@@ -13,22 +13,20 @@
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: Software Development :: Quality Assurance"
+        "Topic :: Software Development :: Quality Assurance",
     ],
     "entry_points": {
         "console_scripts": [
             "black=black:patched_main",
             "blackd=blackd:patched_main [d]",
-            "black-primer=black_primer.cli:main"
+            "black-primer=black_primer.cli:main",
         ]
     },
     "description": "Blacker! Denser Black formatting",
     "include_package_data": true,
     "license": "MIT",
     "name": "blacker",
-    "packages": [
-        "mo_dots"
-    ],
+    "packages": ["mo_dots"],
     "url": "https://github.com/klahnakoski/blacker",
-    "version": "3.85.20198"
+    "version": "3.85.20198",
 }
