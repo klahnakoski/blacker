@@ -5,7 +5,6 @@ _build
 docs/_static/pypi.svg
 .tox
 __pycache__
-black.egg-info
 build/
 dist/
 pip-wheel-metadata/
@@ -14,5 +13,6 @@ src/_black_version.py
 .eggs
 .dmypy.json
 *.swp
-/*.iml
-/.venv
+*.iml
+.venv
+*.egg-info

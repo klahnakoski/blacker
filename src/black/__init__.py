@@ -60,7 +60,7 @@ from blib2to3.pgen2.grammar import Grammar
 from blib2to3.pgen2.parse import ParseError
 from blib2to3.pytree import Node, Leaf, type_repr
 
-__version__ = json2value(File("setuptools.json").read()).version
+__version__ = "unknonwn"
 
 if TYPE_CHECKING:
     import colorama  # noqa: F401

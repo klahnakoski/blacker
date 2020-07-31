@@ -15,7 +15,7 @@
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Software Development :: Quality Assurance"
     ],
-    "description": "Blacker! Denser Black formatting",
+    "description": "More Black! Denser Black formatting",
     "entry_points": {"console_scripts": [
         "black=black:patched_main",
         "blackd=blackd:patched_main [d]",
@@ -32,7 +32,7 @@
     "long_description": {
         "$concat": [
             "",
-            "# Blacker - Denser Black formatting",
+            "# More Black! - Denser Black formatting",
             "",
             "This is s a fork of [the Blackcode formatter](https://github.com/psf/black)",
             "",
@@ -55,7 +55,7 @@
             "}",
             "```",
             "",
-            "### Solution: Blacker!",
+            "### Solution: More Black!",
             "",
             "When there is only one property (or list item, or parameter), then do not make a new line.",
             "",
@@ -70,7 +70,7 @@
             "## Development",
             "",
             "",
-            "Be sure you are in the `blacker` main directory",
+            "Be sure you are in the `mo-black` main directory",
             "",
             "    python -m venv .venv",
             "    source .venv/bin/activate",
@@ -95,9 +95,9 @@
         "separator": "\n"
     },
     "long_description_content_type": "text/markdown",
-    "name": "blacker",
+    "name": "mo-black",
     "package_dir": {"": "src"},
     "packages": ["blackd", "black", "blib2to3", "blib2to3.pgen2"],
-    "url": "https://github.com/klahnakoski/blacker",
+    "url": "https://github.com/klahnakoski/mo-black",
     "version": "3.89.20213"
 }
