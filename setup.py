@@ -1,7 +1,7 @@
 # Copyright (C) 2020 Łukasz Langa
-from setuptools import setup
 import sys
-import os
+
+from setuptools import setup
 
 assert sys.version_info >= (3, 6, 0), "black requires Python 3.6+"
 from pathlib import Path  # noqa E402
@@ -10,32 +10,6 @@ CURRENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(CURRENT_DIR))  # for setuptools.build_meta
 
 
-USE_MYPYC = False
-# To compile with mypyc, a mypyc checkout must be present on the PYTHONPATH
-if len(sys.argv) > 1 and sys.argv[1] == "--use-mypyc":
-    sys.argv.pop(1)
-    USE_MYPYC = True
-if os.getenv("BLACK_USE_MYPYC", None) == "1":
-    USE_MYPYC = True
-
-if USE_MYPYC:
-    mypyc_targets = [
-        "src/black/__init__.py",
-        "src/blib2to3/pytree.py",
-        "src/blib2to3/pygram.py",
-        "src/blib2to3/pgen2/parse.py",
-        "src/blib2to3/pgen2/grammar.py",
-        "src/blib2to3/pgen2/token.py",
-        "src/blib2to3/pgen2/driver.py",
-        "src/blib2to3/pgen2/pgen.py",
-    ]
-
-    from mypyc.build import mypycify
-
-    opt_level = os.getenv("MYPYC_OPT_LEVEL", "3")
-    ext_modules = mypycify(mypyc_targets, opt_level=opt_level)
-else:
-    ext_modules = []
 
 setup(
     name="black",
@@ -50,7 +24,6 @@ setup(
     url="https://github.com/psf/black",
     license="MIT",
     py_modules=["_black_version"],
-    ext_modules=ext_modules,
     packages=["blackd", "black", "blib2to3", "blib2to3.pgen2", "black_primer"],
     package_dir={"": "src"},
     package_data={"blib2to3": ["*.txt"], "black": ["py.typed"]},
