@@ -34,8 +34,12 @@ schema = {"mappings": {"test": {"properties": {"one_value": {
 
 ```
 
-## Development
+## Usage
 
+Please [read the official Black documentation at time of fork](https://github.com/psf/black/blob/537ea8df35b1004bdb228b483907fb5dd92e5257/README.md#usage)
+
+
+## Development
 
 Be sure you are in the `mo-black` main directory
 
@@ -58,4 +62,8 @@ Be sure you are in the `mo-black` main directory
     set SKIP_AST_PRINT=true
     python -m unittest tests\test_black.py
 
+### Development Installation
 
+You can install `mo-black` from the main directory
+
+    python.exe -m pip install .
