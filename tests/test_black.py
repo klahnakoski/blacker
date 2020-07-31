@@ -158,8 +158,10 @@ class BlackTestCase(unittest.TestCase):
         for i, (e, a) in enumerate(zip_longest(expected, actual)):
             if e != a:
                 from mo_logs import Log
+
                 Log.note(
-                    "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
+                    "problem at char {{i}}\nexpect: {{expected|quote}}\nactual:"
+                    " {{actual|quote}}",
                     i=i,
                     expected=expected[i - 20 : i + 20],
                     actual=actual[i - 20 : i + 20],

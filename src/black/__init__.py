@@ -14,7 +14,6 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
 from contextlib import contextmanager
-from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache, partial, wraps
@@ -46,8 +45,10 @@ from typing import (
 import click
 import regex as re
 import toml
-from _black_version import version as __version__
 from appdirs import user_cache_dir
+from dataclasses import dataclass, field, replace
+from mo_files import File
+from mo_json import json2value
 from mypy_extensions import mypyc_attr
 from pathspec import PathSpec
 from typed_ast import ast3, ast27
@@ -57,8 +58,9 @@ from blib2to3 import pygram, pytree
 from blib2to3.pgen2 import driver, token
 from blib2to3.pgen2.grammar import Grammar
 from blib2to3.pgen2.parse import ParseError
-# lib2to3 fork
 from blib2to3.pytree import Node, Leaf, type_repr
+
+__version__ = json2value(File("setuptools.json").read()).version
 
 if TYPE_CHECKING:
     import colorama  # noqa: F401
@@ -905,6 +907,7 @@ def format_file_contents(src_contents: str, *, fast: bool, mode: Mode) -> FileCo
     for i, (e, a) in enumerate(itertools.zip_longest(src_contents, dst_contents)):
         if e != a:
             from mo_logs import Log
+
             Log.note(
                 "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
                 i=i,

@@ -11,3 +11,7 @@ typing_extensions>=3.7.4
 mypy_extensions>=0.4.3
 aiohttp_cors
 aiohttp
+mo-files
+mo-logs
+mo-math
+mo-json
