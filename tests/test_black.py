@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 import asyncio
 import logging
+import os
+import sys
+import unittest
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
 from io import BytesIO, TextIOWrapper
-import os
+from itertools import zip_longest
 from pathlib import Path
-import regex as re
-import sys
 from tempfile import TemporaryDirectory
 from typing import Any, BinaryIO, Dict, Generator, List, Tuple, Iterator, TypeVar
-import unittest
 from unittest.mock import patch, MagicMock
 
 import click
+import regex as re
 from click import unstyle
 from click.testing import CliRunner
-from mo_logs import Log
 
 import black
 from black import Feature, TargetVersion
@@ -34,7 +34,6 @@ else:
 from pathspec import PathSpec
 
 # Import other test classes
-from .test_primer import PrimerCLITests  # noqa: F401
 
 
 ff = partial(black.format_file_in_place, mode=black.FileMode(), fast=True)
@@ -156,8 +155,9 @@ class BlackTestCase(unittest.TestCase):
                 list(bdv.visit(exp_node))
             except Exception as ve:
                 black.err(str(ve))
-        for i, (e, a) in enumerate(zip(expected, actual)):
+        for i, (e, a) in enumerate(zip_longest(expected, actual)):
             if e != a:
+                from mo_logs import Log
                 Log.note(
                     "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
                     i=i,

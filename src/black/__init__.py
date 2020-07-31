@@ -1,25 +1,25 @@
 import ast
 import asyncio
-from abc import ABC, abstractmethod
-from collections import defaultdict
-from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
-from contextlib import contextmanager
-from datetime import datetime
-from enum import Enum
-from functools import lru_cache, partial, wraps
 import io
 import itertools
 import logging
-from multiprocessing import Manager, freeze_support
 import os
-from pathlib import Path
 import pickle
-import regex as re
 import signal
 import sys
 import tempfile
 import tokenize
 import traceback
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
+from contextlib import contextmanager
+from dataclasses import dataclass, field, replace
+from datetime import datetime
+from enum import Enum
+from functools import lru_cache, partial, wraps
+from multiprocessing import Manager, freeze_support
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -43,26 +43,22 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from mo_future import zip_longest
-from mo_logs import Log
-from typing_extensions import Final
-from mypy_extensions import mypyc_attr
-
-from appdirs import user_cache_dir
-from dataclasses import dataclass, field, replace
 import click
+import regex as re
 import toml
-from typed_ast import ast3, ast27
+from _black_version import version as __version__
+from appdirs import user_cache_dir
+from mypy_extensions import mypyc_attr
 from pathspec import PathSpec
+from typed_ast import ast3, ast27
+from typing_extensions import Final
 
-# lib2to3 fork
-from blib2to3.pytree import Node, Leaf, type_repr
 from blib2to3 import pygram, pytree
 from blib2to3.pgen2 import driver, token
 from blib2to3.pgen2.grammar import Grammar
 from blib2to3.pgen2.parse import ParseError
-
-from _black_version import version as __version__
+# lib2to3 fork
+from blib2to3.pytree import Node, Leaf, type_repr
 
 if TYPE_CHECKING:
     import colorama  # noqa: F401
@@ -906,8 +902,9 @@ def format_file_contents(src_contents: str, *, fast: bool, mode: Mode) -> FileCo
     if src_contents == dst_contents:
         raise NothingChanged
 
-    for i, (e, a) in enumerate(zip_longest(src_contents, dst_contents)):
+    for i, (e, a) in enumerate(itertools.zip_longest(src_contents, dst_contents)):
         if e != a:
+            from mo_logs import Log
             Log.note(
                 "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
                 i=i,
