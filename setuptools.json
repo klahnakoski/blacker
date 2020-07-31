@@ -23,10 +23,10 @@
     ]},
     "include_package_data": true,
     "install_requires": [
-                 "aiohttp",     "aiohttp_cors",          "appdirs",    "attrs>=18.1.0",
-              "click>=6.5", "dataclasses>=0.6",         "mo-files",          "mo-json",
-                 "mo-logs",          "mo-math",         "pathspec",  "regex>=2020.1.8",
-             "toml>=0.9.4", "typed-ast>=1.4.0"
+                 "aiohttp",     "aiohttp_cors",          "appdirs",    "attrs==18.1.0",
+              "click==6.5", "dataclasses==0.6",         "mo-files",          "mo-json",
+                 "mo-logs",          "mo-math",         "pathspec",  "regex==2020.1.8",
+             "toml==0.9.4", "typed-ast==1.4.0"
     ],
     "license": "MIT",
     "long_description": {
@@ -96,7 +96,10 @@
     },
     "long_description_content_type": "text/markdown",
     "name": "blacker",
-    "packages":["blackd", "black", "blib2to3", "blib2to3.pgen2", "black_primer"],
+    "packages": [
+                "blackd",          "black",       "blib2to3", "blib2to3.pgen2",
+          "black_primer"
+    ],
     "url": "https://github.com/klahnakoski/blacker",
-    "version": "3.86.20213"
+    "version": "3.87.20213"
 }
