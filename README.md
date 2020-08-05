@@ -1,7 +1,7 @@
 
 # More Black! - Denser Black formatting
 
-This is s a fork of [the Blackcode formatter](https://github.com/psf/black)
+This is s a fork of [the Black code formatter](https://github.com/psf/black)
 
 ### Problem
 
@@ -22,7 +22,7 @@ schema = {
 }
 ```
 
-The pathology looks even worse for singleton lists; two whole lines are wasted on lonely square brackets:  
+The pathology looks even worse for singleton lists; many lines can be wasted on lonely brackets:  
 
 ```python
 my_method(
