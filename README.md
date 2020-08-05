@@ -22,6 +22,20 @@ schema = {
 }
 ```
 
+The pathology looks even worse for singleton lists; two whole lines are wasted on lonely square brackets:  
+
+```python
+my_method(
+    [
+        {
+            "name": "a",
+            "value": 42
+        }
+    ]
+)
+```
+
+
 ### Solution: More Black!
 
 When there is only one property (or list item, or parameter), then do not make a new line.
@@ -33,6 +47,16 @@ schema = {"mappings": {"test": {"properties": {"one_value": {
 }}}}}
 
 ```
+
+Singleton lists are especially dense. 
+
+```python
+my_method([{
+    "name": "a",
+    "value": 42
+}])
+```
+
 
 ## Usage
 
