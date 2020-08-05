@@ -1,25 +1,25 @@
 import ast
 import asyncio
-from abc import ABC, abstractmethod
-from collections import defaultdict
-from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
-from contextlib import contextmanager
-from datetime import datetime
-from enum import Enum
-from functools import lru_cache, partial, wraps
 import io
 import itertools
 import logging
-from multiprocessing import Manager, freeze_support
 import os
-from pathlib import Path
 import pickle
-import regex as re
 import signal
 import sys
 import tempfile
 import tokenize
 import traceback
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from concurrent.futures import Executor, ThreadPoolExecutor, ProcessPoolExecutor
+from contextlib import contextmanager
+from dataclasses import dataclass, field, replace
+from datetime import datetime
+from enum import Enum
+from functools import lru_cache, partial, wraps
+from multiprocessing import Manager, freeze_support
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -43,26 +43,21 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from mo_future import zip_longest
-from mo_logs import Log
-from typing_extensions import Final
-from mypy_extensions import mypyc_attr
-
-from appdirs import user_cache_dir
-from dataclasses import dataclass, field, replace
 import click
+import regex as re
 import toml
-from typed_ast import ast3, ast27
+from appdirs import user_cache_dir
 from pathspec import PathSpec
+from typed_ast import ast3, ast27
+from typing_extensions import Final
 
-# lib2to3 fork
-from blib2to3.pytree import Node, Leaf, type_repr
 from blib2to3 import pygram, pytree
 from blib2to3.pgen2 import driver, token
 from blib2to3.pgen2.grammar import Grammar
 from blib2to3.pgen2.parse import ParseError
+from blib2to3.pytree import Node, Leaf, type_repr
 
-from _black_version import version as __version__
+__version__ = "unknonwn"
 
 if TYPE_CHECKING:
     import colorama  # noqa: F401
@@ -905,17 +900,6 @@ def format_file_contents(src_contents: str, *, fast: bool, mode: Mode) -> FileCo
     dst_contents = format_str(src_contents, mode=mode)
     if src_contents == dst_contents:
         raise NothingChanged
-
-    for i, (e, a) in enumerate(zip_longest(src_contents, dst_contents)):
-        if e != a:
-            Log.note(
-                "problem at char {{i}}\n{{expected|quote}}\n{{actual|quote}}",
-                i=i,
-                expected=dst_contents[i - 20 : i + 20],
-                actual=src_contents[i - 20 : i + 20],
-            )
-
-            break
 
     if not fast:
         assert_equivalent(src_contents, dst_contents)
@@ -4676,9 +4660,9 @@ def assert_is_leaf_string(string: str) -> None:
         "'",
         '"',
     ), f"{string!r} is missing an ending quote character (' or \")."
-    assert set(string[:quote_idx]).issubset(set(STRING_PREFIX_CHARS)), (
-        f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
-    )
+    assert (
+        set(string[:quote_idx]).issubset(set(STRING_PREFIX_CHARS))
+    ), f"{set(string[:quote_idx])} is NOT a subset of {set(STRING_PREFIX_CHARS)}."
 
 
 def left_hand_split(line: Line, _features: Collection[Feature] = ()) -> Iterator[Line]:
@@ -4802,23 +4786,28 @@ def right_hand_split(
     # IF THE body CAN BE EXPLODED, DO THAT FIRST
     single_item = True
     curr_depth = body.bracket_tracker.depth
+    chain_length = 0
     num_dots = 0
     num_comments = 0
-    for leaf in body.leaves:
+    for leaf, prev_leaf in zip(body.leaves, [None] + body.leaves):
         if leaf.bracket_depth == curr_depth:
             if leaf.type == token.STRING:
                 num_comments += 1
                 if len(leaf.value) > line_length:
+                    chain_length = 0
                     num_dots = 0
                     num_comments = 0
                     single_item = False
             if single_item and leaf.type == token.DOT:
+                if prev_leaf is not None and prev_leaf.type == token.RPAR:
+                    chain_length += 1
                 num_dots += 1
             if (
                 leaf.type == token.COMMA
                 or leaf.type in MATH_OPERATORS
                 or leaf.value in ("and", "or", "#", "if", "in", "is")
             ):
+                chain_length = 0
                 num_dots = 0
                 num_comments = 0
                 single_item = False
@@ -4829,8 +4818,8 @@ def right_hand_split(
     if (
         # NOT A TUPLE
         single_item
-        # SINGLE ITEM WITHOUT CHAINING
-        and num_dots < 3
+        # SINGLE ITEM AND NO CHAINING
+        and chain_length == 0
         # MULTIPLE COMMENTS INDICATES SOME SPECIFL STRING FORMATTING
         and num_comments <= 1
         # THE BODY IS COMPLICATED, OR SIMPLE ASSIGN OR SIMPLE AND SHORT
@@ -6139,7 +6128,6 @@ def assert_stable(src: str, dst: str, mode: Mode) -> None:
         ) from None
 
 
-@mypyc_attr(patchable=True)
 def dump_to_file(*output: str) -> str:
     """Dump `output` to a temporary file. Return path to the file."""
     with tempfile.NamedTemporaryFile(
