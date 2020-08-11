@@ -7,22 +7,7 @@ This is s a fork of [the Black code formatter](https://github.com/psf/black)
 
 I love Black formatting because I agree with its formatting choices, but it does have one pathology: [Excessive indenting on data structures](https://github.com/psf/black/issues/626)
 
-```python
-schema = {
-    "mappings": {
-        "test": {
-            "properties": {
-                "one_value": {
-                    "type": "keyword",
-                    "store": True,
-                }
-            }
-        }
-    }
-}
-```
-
-The pathology looks even worse for singleton lists; many lines can be wasted on lonely brackets:  
+Here is an example of Black formatting; many lines are wasted on lonely brackets:  
 
 ```python
 my_method(
@@ -35,20 +20,9 @@ my_method(
 )
 ```
 
-
-### Solution: More Black!
+## Solution: More Black!
 
 When there is only one property (or list item, or parameter), then do not make a new line.
-
-```python
-schema = {"mappings": {"test": {"properties": {"one_value": {
-    "type": "keyword", 
-    "store": True,
-}}}}}
-
-```
-
-Singleton lists are especially dense. 
 
 ```python
 my_method([{
@@ -62,6 +36,12 @@ my_method([{
 
 Please [read the official Black documentation at time of fork](https://github.com/psf/black/blob/537ea8df35b1004bdb228b483907fb5dd92e5257/README.md#usage)
 
+    pip install mo-black
+
+
+## More about this fork
+
+The `right_hand_split()` function has [additional code](https://github.com/klahnakoski/mo-black/blob/25e1fd648530279dffbf701721df76d52213651a/src/black/__init__.py#L4786) that attempts to identify "simple" structures inside brackets. If it is simple, then block the multiline formatting and, recurse into deeper brackets to find something more complicated to split.
 
 ## Development
 
@@ -97,13 +77,6 @@ Here is the same for Windows...
     set SKIP_AST_PRINT=true
     python -m unittest tests\test_black.py
 
-### Upgrade `requirements.txt`
-
-The `requirements.in` file is for humans to update.  Use `pip-compile` to update the locked `requirements.txt` file:
-
-    pip install -r tests\requirements.txt
-    pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in
-    pip install -r requirements.txt
 
 ### Development Installation
 
