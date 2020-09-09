@@ -15,4 +15,5 @@ src/_black_version.py
 *.swp
 *.iml
 .venv
+.svn
 *.egg-info
