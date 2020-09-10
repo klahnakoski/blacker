@@ -150,6 +150,10 @@
     "name": "mo-black",
     "package_dir": {"": "src"},
     "packages": ["blackd", "black", "blib2to3", "blib2to3.pgen2"],
+    "use_scm_version": {
+        "write_to": "src/_black_version.py",
+        "write_to_template": "version = \"{version}\"\n",
+    },
     "url": "https://github.com/klahnakoski/mo-black",
     "version": "3.90.20218"
 }
