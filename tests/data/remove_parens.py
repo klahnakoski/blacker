@@ -1,4 +1,4 @@
-(y).x
+(y).x  # TODO: fix me
 
 x = (1)
 x = (1.2)
@@ -58,7 +58,7 @@ def example8():
 
 
 # output
-y.x
+(y).x  # TODO: fix me
 
 x = 1
 x = 1.2
